@@ -79,7 +79,27 @@ def call(To, CC, Subject, appName, stage_step, build_status, env, buildArtifactN
       <br>${appName} application has been built successfully with build no ${BUILD_NUMBER}</br>
 
       <br>Build Report Link for reference:</br>
+      <br><u><b>Quality Review:</b></u></br>
+      <br>${sonarLink}</br>
+      
+      emailcontent=emailcontentPass + emailcontentEnd
       """
+    }else{
+      echo "Testing Success"
+      emailcontent=emailcontentPass + emailcontentEnd + " for ${env} environment"
     }
   }
+
+  def regexStr=/[a-zA-Z0-9.'_%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}/
+
+  if(To.matches(regexStr)){
+    EmailRecipient=To
+  }else{
+    EmailRecipient=getEmail(To)  //calling shared getEmail fun and To=githubTeamNamesSeparatedBy;InPipeline
+  }
+
+  emailext to: "${EmailRecipient}",
+  mimeType: 'text/html',
+  subject: "${Subject}",
+  body: "${emailcontent}"
 }
